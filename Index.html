@@ -786,35 +786,36 @@
         let convertedFileBlob = null;
 
         // Initialize FFmpeg
-        async function initFFmpeg() {
-            if (ffmpegLoaded) return true;
+async function initFFmpeg() {
+        if (ffmpegLoaded) return true;
+        
+        try {
+            showLoading('Initializing Audio Converter...', 'This may take a moment on first load');
             
-            try {
-                showLoading('Initializing Audio Converter...', 'This may take a moment on first load');
-                
-                const { FFmpeg } = window.FFmpeg;
-                const { fetchFile, toBlobURL } = window.FFmpegUtil;
-                
-                ffmpeg = new FFmpeg();
-                
-                // Load FFmpeg
-                const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.4/dist/umd';
-                await ffmpeg.load({
-                    coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-                    wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-                });
-                
-                ffmpegLoaded = true;
-                hideLoading();
-                showSuccess('Audio converter ready!');
-                return true;
-            } catch (error) {
-                hideLoading();
-                showError('Failed to load audio converter: ' + error.message);
-                return false;
-            }
+            const { FFmpeg } = window.FFmpeg;
+            const { fetchFile, toBlobURL } = window.FFmpegUtil;
+            
+            ffmpeg = new FFmpeg();
+            
+            // New base URL for local core files
+            // This is the only change
+            const baseURL = '.'; 
+            
+            await ffmpeg.load({
+                coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+                wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+            });
+            
+            ffmpegLoaded = true;
+            hideLoading();
+            showSuccess('Audio converter ready!');
+            return true;
+        } catch (error) {
+            hideLoading();
+            showError('Failed to load audio converter: ' + error.message);
+            return false;
         }
-
+    }
         // File input handling
         const fileInput = document.getElementById('fileInput');
         const uploadArea = document.querySelector('.upload-area');
